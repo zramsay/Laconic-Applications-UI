@@ -186,7 +186,8 @@ const UrlList: React.FC<{ deployment: DeploymentRecord }> = ({ deployment }) => 
       const urlAttribute = deployment.attributes.find(attr => attr.key === 'url');
       if (urlAttribute && urlAttribute.value.string) {
         const urls = urlAttribute.value.string.split(',');
-        const initialStatuses = Object.fromEntries(urls.map(url => [url, 'checking']));
+        const initialStatuses: Record<string, "checking" | "available" | "unavailable"> = 
+          Object.fromEntries(urls.map(url => [url, 'checking' as const]));
         setUrlStatuses(initialStatuses);
 
         for (const url of urls) {
