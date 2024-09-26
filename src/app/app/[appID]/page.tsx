@@ -171,7 +171,7 @@ const AppDeploymentPage: React.FC = () => {
           ) : (
             <InfoItem icon={<LinkIcon className="h-5 w-5" />} label="Repository" value="Unknown" />
           )}
-</div>
+        </div>
       </div>
       
       <div className="bg-white shadow-lg rounded-lg p-6">
