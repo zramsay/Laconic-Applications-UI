@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { bech32 } from 'bech32';
 import Link from 'next/link';
-import { ChartBarIcon, UsersIcon, ClockIcon, CalendarIcon, MagnifyingGlassIcon, ArrowsUpDownIcon } from '@heroicons/react/24/outline';
+import { ChartBarIcon, UsersIcon, ClockIcon, CalendarIcon, MagnifyingGlassIcon, ArrowsUpDownIcon, LinkIcon } from '@heroicons/react/24/outline';
 
 interface ApplicationRecord {
   id: string;
@@ -16,6 +16,7 @@ interface ApplicationRecord {
     key: string;
     value: {
       string?: string;
+      value?: { string: string }[];
     };
   }[];
 }
@@ -46,15 +47,51 @@ const AppList: React.FC = () => {
               names
               owners
               attributes {
-                key
+                ...AttrParts
                 value {
-                  ... on StringValue {
-                    string: value
+                  ... on MapValue {
+                    map: value {
+                      ...AttrParts
+                    }
                   }
                 }
               }
             }
-          }`
+          }
+      
+          fragment ValueParts on Value {
+            ... on BooleanValue {
+              bool: value
+            }
+            ... on IntValue {
+              int: value
+            }
+            ... on FloatValue {
+              float: value
+            }
+            ... on StringValue {
+              string: value
+            }
+            ... on BytesValue {
+              bytes: value
+            }
+            ... on LinkValue {
+              link: value
+            }
+          }
+      
+          fragment AttrParts on Attribute {
+            key
+            value {
+              ...ValueParts
+              ... on ArrayValue {
+                value {
+                  ...ValueParts
+                }
+              }
+            }
+          }
+          `
         });
         setApps(response.data.data.appDeploymentRecords);
       } catch (error) {
@@ -185,6 +222,7 @@ const AppList: React.FC = () => {
             <option value="name">Name</option>
             <option value="authority">Authority</option>
             <option value="owner">Owner</option>
+            <option value="repository">Repository</option>
           </select>
         </div>
       </div>
@@ -203,6 +241,7 @@ const AppList: React.FC = () => {
               <InfoItem icon={<CalendarIcon className="h-5 w-5 flex-shrink-0" />} label="Created" value={new Date(app.createTime).toLocaleString()} />
               <InfoItem icon={<CalendarIcon className="h-5 w-5 flex-shrink-0" />} label="Expires" value={new Date(app.expiryTime).toLocaleString()} />
               <InfoItem icon={<UsersIcon className="h-5 w-5 flex-shrink-0" />} label="Owner" value={app.owners.map(hexToBech32).join(', ')} />
+              <InfoItem icon={<LinkIcon className="h-5 w-5 flex-shrink-0" />} label="Repository" value={app.attributes.find(attr => attr.key === 'repository')?.value?.value?.[0]?.string || 'Unknown'} />
             </div>
             <Link 
               href={{
@@ -213,7 +252,8 @@ const AppList: React.FC = () => {
                   authority: getAuthority(app.names),
                   created: app.createTime,
                   expires: app.expiryTime,
-                  owner: hexToBech32(app.owners[0] || '')
+                  owner: hexToBech32(app.owners[0] || ''),
+                  repository: app.attributes.find(attr => attr.key === 'repository')?.value?.value?.[0]?.string || 'Unknown',
                 }
               }}
               className="mt-2 inline-block px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-300 ease-in-out text-sm font-medium"

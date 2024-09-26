@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
-import { ArrowLeftIcon, ClockIcon, UserIcon, ShieldCheckIcon, CalendarIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, ClockIcon, UserIcon, ShieldCheckIcon, CalendarIcon, LinkIcon } from '@heroicons/react/24/outline';
 
 interface DeploymentRecord {
   id: string;
@@ -15,6 +15,20 @@ interface DeploymentRecord {
   }[];
 }
 
+const InfoLink: React.FC<{ label: string; href: string }> = ({ label, href }) => (
+  <div className="flex items-center">
+    <LinkIcon className="h-5 w-5 text-gray-500 mr-2" />
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-blue-600 hover:text-blue-800 hover:underline transition duration-300 ease-in-out"
+    >
+      {label}
+    </a>
+  </div>
+);
+
 const AppDeploymentPage: React.FC = () => {
   const [deployments, setDeployments] = useState<DeploymentRecord[]>([]);
   const [appInfo, setAppInfo] = useState({
@@ -24,6 +38,7 @@ const AppDeploymentPage: React.FC = () => {
     created: '',
     expires: '',
     owner: '',
+    repository: '',
   });
   const [isLoading, setIsLoading] = useState(true);
   const params = useParams();
@@ -37,6 +52,7 @@ const AppDeploymentPage: React.FC = () => {
     const created = searchParams.get('created') || 'Invalid Date';
     const expires = searchParams.get('expires') || 'Invalid Date';
     const owner = searchParams.get('owner') || '';
+    const repository = searchParams.get('repository') || 'Unknown';
 
     setAppInfo({
       name,
@@ -45,6 +61,7 @@ const AppDeploymentPage: React.FC = () => {
       created: new Date(created).toLocaleString(),
       expires: new Date(expires).toLocaleString(),
       owner,
+      repository,
     });
 
     const fetchDeployments = async () => {
@@ -148,7 +165,13 @@ const AppDeploymentPage: React.FC = () => {
           <InfoItem icon={<CalendarIcon className="h-5 w-5" />} label="Created" value={appInfo.created} />
           <InfoItem icon={<CalendarIcon className="h-5 w-5" />} label="Expires" value={appInfo.expires} />
           <InfoItem icon={<UserIcon className="h-5 w-5" />} label="Owner" value={appInfo.owner} />
-        </div>
+          <div className="md:col-span-2"></div>
+          {appInfo.repository ? (
+          <InfoLink label={appInfo.repository} href={appInfo.repository} />
+          ) : (
+            <InfoItem icon={<LinkIcon className="h-5 w-5" />} label="Repository" value="Unknown" />
+          )}
+</div>
       </div>
       
       <div className="bg-white shadow-lg rounded-lg p-6">
