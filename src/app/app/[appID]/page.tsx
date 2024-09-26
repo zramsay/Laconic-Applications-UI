@@ -18,14 +18,18 @@ interface DeploymentRecord {
 const InfoLink: React.FC<{ label: string; href: string }> = ({ label, href }) => (
   <div className="flex items-center">
     <LinkIcon className="h-5 w-5 text-gray-500 mr-2" />
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-blue-600 hover:text-blue-800 hover:underline transition duration-300 ease-in-out"
-    >
-      {label}
-    </a>
+    
+    <div className="flex flex-col">
+      <span className="text-sm text-gray-500">Repository</span>
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-600 hover:text-blue-800 hover:underline transition duration-300 ease-in-out"
+      >
+        {label}
+      </a>
+    </div>
   </div>
 );
 
@@ -166,7 +170,7 @@ const AppDeploymentPage: React.FC = () => {
           <InfoItem icon={<CalendarIcon className="h-5 w-5" />} label="Expires" value={appInfo.expires} />
           <InfoItem icon={<UserIcon className="h-5 w-5" />} label="Owner" value={appInfo.owner} />
           <div className="md:col-span-2"></div>
-          {appInfo.repository ? (
+          {appInfo.repository ? ( 
           <InfoLink label={appInfo.repository} href={appInfo.repository} />
           ) : (
             <InfoItem icon={<LinkIcon className="h-5 w-5" />} label="Repository" value="Unknown" />
